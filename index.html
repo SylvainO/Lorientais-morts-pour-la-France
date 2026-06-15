@@ -589,16 +589,6 @@
       <span class="lm-hidden">{{ ctx.parameters['refine.conflit'] = memorial.conflit ? memorial.conflit : undefined; '' }}</span>
       <span class="lm-hidden">{{ ctx.parameters.q = search.text ? search.text : undefined; '' }}</span>
 
-      <!-- ============ Agrégations KPI (cachées) ============ -->
-      <span class="lm-hidden" ods-adv-analysis="kpiTotal" ods-adv-analysis-context="ctx"
-            ods-adv-analysis-select="count(*) as nb">{{ values.total = kpiTotal[0].nb; '' }}</span>
-      <span class="lm-hidden" ods-adv-analysis="kpiMer" ods-adv-analysis-context="ctx"
-            ods-adv-analysis-select="count(*) as nb"
-            ods-adv-analysis-where="code_pays_deces LIKE 'MER'">{{ values.mer = kpiMer[0].nb; '' }}</span>
-      <span class="lm-hidden" ods-adv-analysis="kpiMil" ods-adv-analysis-context="ctx"
-            ods-adv-analysis-select="count(*) as nb"
-            ods-adv-analysis-where="categorie LIKE 'Militaire%'">{{ values.mil = kpiMil[0].nb; '' }}</span>
-
       <!-- ====================================================== -->
       <!-- HERO                                                   -->
       <!-- ====================================================== -->
@@ -614,15 +604,15 @@
 
           <div class="lm-kpis">
             <div class="lm-kpi">
-              <div class="lm-kpi__value">{{ (values.total | number:0) || '…' }}</div>
+              <div class="lm-kpi__value">{{ kpis[memorial.conflit || 'all'].total | number:0 }}</div>
               <div class="lm-kpi__label"><i class="fa fa-users" aria-hidden="true"></i> Morts pour la France</div>
             </div>
             <div class="lm-kpi">
-              <div class="lm-kpi__value">{{ (values.mer | number:0) || '0' }}</div>
+              <div class="lm-kpi__value">{{ kpis[memorial.conflit || 'all'].mer | number:0 }}</div>
               <div class="lm-kpi__label"><i class="fa fa-anchor" aria-hidden="true"></i> Tombés en mer</div>
             </div>
             <div class="lm-kpi">
-              <div class="lm-kpi__value">{{ (values.mil | number:0) || '0' }}</div>
+              <div class="lm-kpi__value">{{ kpis[memorial.conflit || 'all'].mil | number:0 }}</div>
               <div class="lm-kpi__label"><i class="fa fa-shield" aria-hidden="true"></i> Militaires</div>
             </div>
             <div class="lm-kpi">
@@ -889,7 +879,20 @@
         });
         return out;
       };
-    });
+    })
+    // KPIs pré-calculés (données figées, maj 2019) → indicateurs instantanés, zéro fetch,
+    // et réactifs aux onglets. Clé = valeur exacte du champ "conflit" (ou 'all').
+    .run(['$rootScope', function ($rootScope) {
+      $rootScope.kpis = {
+        'all':                                                    { total: 2132, mer: 370, mil: 1806 },
+        'Première Guerre mondiale':                               { total: 1524, mer: 261, mil: 1500 },
+        'Seconde Guerre mondiale':                                { total: 508,  mer: 109, mil: 206 },
+        "Guerre d'Indochine":                                     { total: 50,   mer: 0,   mil: 50 },
+        "Guerre d'Algérie, des combats du Maroc et de la Tunisie": { total: 28,  mer: 0,   mil: 28 },
+        'Guerre de Corée':                                        { total: 3,    mer: 0,   mil: 3 },
+        "Autres théâtres d'opérations":                           { total: 19,   mer: 0,   mil: 19 }
+      };
+    }]);
 </script>
 </body>
 </html>

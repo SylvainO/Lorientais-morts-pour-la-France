@@ -1,0 +1,895 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Les Lorientais Morts pour la France — Mémorial</title>
+
+  <!-- ===================================================================
+       PAGE AUTONOME EMBARQUABLE (iframe) — ods-widgets hors portail Huwise
+       Dataset : lorientais-morts-pour-la-france-ville-de-lorient-analyse-par-commune
+       Domaine public : sdem.huwise.com
+       Stack chargée par la page elle-même : jQuery + AngularJS + ngSanitize
+       + ods-widgets (CDN static.huwise.com) + Font Awesome + Roboto.
+       Embarquer ensuite sur un site externe via :
+         <iframe src="…/lorient-memorial-embed.html"
+                 style="width:100%;height:100%;border:0" loading="lazy"></iframe>
+       =================================================================== -->
+
+  <!-- Polices & icônes -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+
+  <!-- Feuille de style ods-widgets (widgets natifs : carte, chart, pagination…) -->
+  <link rel="stylesheet" href="https://static.huwise.com/ods-widgets/latest-v2/ods-widgets.min.css">
+
+  <style>
+    /* =====================================================================
+       MÉMORIAL DES LORIENTAIS MORTS POUR LA FRANCE — Ville de Lorient
+       Charte Morbihan Energies (bleu #003e6a / orange #da8e2b, clip-path,
+       séparateur orange sous titres, hover translateY).
+       Identique à la page Huwise, inlinée pour l'embarquement externe.
+       ===================================================================== */
+
+    html, body { margin: 0; padding: 0; }
+    body { background: #f4f6f8; }
+    [ng-cloak] { display: none !important; }
+
+    .lm-page {
+        --lm-blue: #003e6a;
+        --lm-blue-dark: #00233b;
+        --lm-blue-light: #0069b4;
+        --lm-orange: #da8e2b;
+        --lm-orange-vif: #f08300;
+        --lm-bg: #f4f6f8;
+        --lm-white: #fff;
+        --lm-border: #e2e8ef;
+        --lm-text: #003e6a;
+        --lm-muted: #5b7184;
+
+        font-family: Roboto, Arial, Helvetica, sans-serif;
+        color: var(--lm-text);
+        background: var(--lm-bg);
+        max-width: 1240px;
+        margin: 0 auto;
+        padding-bottom: 60px;
+    }
+
+    .lm-hidden {
+        position: absolute;
+        left: -9999px;
+        width: 1px;
+        height: 1px;
+        overflow: hidden;
+    }
+
+    /* ===================== HERO ===================== */
+    .lm-hero {
+        position: relative;
+        background: linear-gradient(135deg, var(--lm-blue-dark) 0%, var(--lm-blue) 60%, var(--lm-blue-light) 140%);
+        color: var(--lm-white);
+        padding: 56px 40px 90px;
+        -webkit-clip-path: polygon(0 0, 100% 0, 100% 88%, 0 100%);
+        clip-path: polygon(0 0, 100% 0, 100% 88%, 0 100%);
+        overflow: hidden;
+    }
+
+    .lm-hero::after {
+        content: "";
+        position: absolute;
+        top: -60px;
+        right: -40px;
+        width: 320px;
+        height: 320px;
+        background: radial-gradient(circle, rgba(218, 142, 43, 0.18) 0%, rgba(218, 142, 43, 0) 70%);
+        pointer-events: none;
+    }
+
+    .lm-hero__inner {
+        position: relative;
+        max-width: 900px;
+    }
+
+    .lm-hero__eyebrow {
+        margin: 0 0 10px;
+        font-size: 0.95rem;
+        font-weight: 600;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+        color: var(--lm-orange);
+    }
+
+    .lm-hero__eyebrow .fa { margin-right: 6px; }
+
+    .lm-hero__title {
+        margin: 0 0 16px;
+        font-size: 2.6rem;
+        font-weight: 300;
+        line-height: 1.1;
+        position: relative;
+        padding-bottom: 18px;
+        color: var(--lm-white);
+    }
+
+    .lm-hero__title::after {
+        content: "";
+        position: absolute;
+        left: 0;
+        bottom: 0;
+        width: 90px;
+        height: 5px;
+        background: var(--lm-orange);
+        border-radius: 3px;
+    }
+
+    .lm-hero__source {
+        margin: 0 0 32px;
+        font-size: 0.95rem;
+        font-weight: 400;
+        line-height: 1.5;
+        color: #cfe0ee;
+    }
+
+    .lm-hero__source .fa { color: var(--lm-orange); margin-right: 6px; }
+
+    .lm-hero__source a { color: var(--lm-white); text-decoration: underline; }
+    .lm-hero__source a:hover { color: var(--lm-orange); }
+
+    /* ===================== KPIs ===================== */
+    .lm-kpis {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 18px;
+    }
+
+    .lm-kpi {
+        flex: 1 1 180px;
+        background: rgba(255, 255, 255, 0.08);
+        border: 1px solid rgba(255, 255, 255, 0.16);
+        border-radius: 10px;
+        padding: 20px 22px;
+        backdrop-filter: blur(4px);
+        -webkit-backdrop-filter: blur(4px);
+        transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .lm-kpi:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 10px 24px rgba(0, 0, 0, 0.22);
+    }
+
+    .lm-kpi__value {
+        font-size: 2.2rem;
+        font-weight: 700;
+        line-height: 1;
+        color: var(--lm-white);
+    }
+
+    .lm-kpi__label {
+        margin-top: 8px;
+        font-size: 0.9rem;
+        color: #cfe0ee;
+    }
+
+    .lm-kpi__label .fa { color: var(--lm-orange); margin-right: 5px; }
+
+    /* ===================== TABS (conflits) ===================== */
+    .lm-tabs {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 10px;
+        margin: -40px auto 0;
+        padding: 0 24px;
+        position: relative;
+        z-index: 3;
+    }
+
+    .lm-tab {
+        background: var(--lm-white);
+        color: var(--lm-blue);
+        border: 1px solid var(--lm-border);
+        border-radius: 30px;
+        padding: 11px 20px;
+        font-family: inherit;
+        font-size: 0.95rem;
+        font-weight: 500;
+        cursor: pointer;
+        box-shadow: 0 4px 12px rgba(0, 35, 59, 0.08);
+        transition: background 0.18s, color 0.18s, transform 0.18s, box-shadow 0.18s;
+    }
+
+    .lm-tab:hover {
+        color: var(--lm-orange-vif);
+        transform: translateY(-2px);
+    }
+
+    .lm-tab.is-active {
+        background: var(--lm-blue);
+        color: var(--lm-white);
+        border-color: var(--lm-blue);
+        box-shadow: 0 6px 16px rgba(0, 62, 106, 0.32);
+    }
+
+    .lm-tabs__context {
+        text-align: center;
+        margin: 18px auto 0;
+        font-size: 0.95rem;
+        color: var(--lm-muted);
+    }
+
+    .lm-tabs__context .fa { color: var(--lm-orange); margin-right: 4px; }
+
+    .lm-tabs__reset {
+        background: none;
+        border: none;
+        color: var(--lm-blue-light);
+        font-family: inherit;
+        font-size: 0.9rem;
+        font-weight: 600;
+        cursor: pointer;
+        margin-left: 10px;
+        text-decoration: underline;
+    }
+
+    .lm-tabs__reset:hover { color: var(--lm-orange-vif); }
+
+    /* ===================== SECTIONS ===================== */
+    .lm-section {
+        padding: 46px 24px 0;
+    }
+
+    .lm-h2 {
+        font-size: 1.9rem;
+        font-weight: 300;
+        margin: 0 0 6px;
+        position: relative;
+        padding-bottom: 14px;
+    }
+
+    .lm-h2::after {
+        content: "";
+        position: absolute;
+        left: 0;
+        bottom: 0;
+        width: 70px;
+        height: 4px;
+        background: var(--lm-orange);
+        border-radius: 3px;
+    }
+
+    .lm-h3 {
+        font-size: 1.2rem;
+        font-weight: 600;
+        margin: 0 0 18px;
+        color: var(--lm-blue);
+    }
+
+    .lm-lead {
+        font-size: 1.05rem;
+        font-weight: 300;
+        line-height: 1.6;
+        color: var(--lm-muted);
+        max-width: 760px;
+        margin: 0 0 26px;
+    }
+
+    /* ===================== CARTES (box) ===================== */
+    .lm-card {
+        background: var(--lm-white);
+        border: 1px solid var(--lm-border);
+        border-radius: 12px;
+        box-shadow: 0 6px 18px rgba(0, 35, 59, 0.06);
+        padding: 22px;
+    }
+
+    /* ===================== GEO (carte + pays) ===================== */
+    .lm-geo {
+        display: grid;
+        grid-template-columns: 1.7fr 1fr;
+        gap: 24px;
+        align-items: stretch;
+    }
+
+    .lm-geo__map { padding: 10px; }
+
+    .lm-map {
+        height: 540px;
+        width: 100%;
+        border-radius: 8px;
+        overflow: hidden;
+    }
+
+    .lm-map__caption {
+        margin: 10px 4px 0;
+        font-size: 0.78rem;
+        color: var(--lm-muted);
+    }
+
+    .lm-map__caption .fa { color: var(--lm-orange); margin-right: 5px; }
+
+    /* ===================== BARRES (pays) ===================== */
+    .lm-bars {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+    }
+
+    .lm-bar { margin-bottom: 16px; }
+
+    .lm-bar__head {
+        display: flex;
+        justify-content: space-between;
+        align-items: baseline;
+        margin-bottom: 5px;
+    }
+
+    .lm-bar__label { font-size: 0.95rem; font-weight: 500; color: var(--lm-blue); }
+    .lm-bar__value { font-size: 0.95rem; font-weight: 700; color: var(--lm-blue-light); }
+
+    .lm-bar__track {
+        height: 9px;
+        background: #eef2f6;
+        border-radius: 6px;
+        overflow: hidden;
+    }
+
+    .lm-bar__fill {
+        height: 100%;
+        background: linear-gradient(90deg, var(--lm-orange) 0%, var(--lm-orange-vif) 100%);
+        border-radius: 6px;
+        transition: width 0.5s ease;
+        min-width: 3px;
+    }
+
+    /* ===================== CHART ===================== */
+    .lm-chart { padding: 18px; }
+    .lm-chart .odswidget-charts { min-height: 360px; }
+
+    /* ===================== CATÉGORIES ===================== */
+    .lm-cats {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 18px;
+    }
+
+    .lm-cat {
+        flex: 1 1 160px;
+        background: var(--lm-white);
+        border: 1px solid var(--lm-border);
+        border-top: 4px solid var(--lm-orange);
+        border-radius: 10px;
+        padding: 22px 18px;
+        text-align: center;
+        box-shadow: 0 6px 18px rgba(0, 35, 59, 0.06);
+        transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .lm-cat:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 12px 26px rgba(0, 35, 59, 0.12);
+    }
+
+    .lm-cat__value {
+        font-size: 2rem;
+        font-weight: 700;
+        color: var(--lm-blue);
+        line-height: 1;
+    }
+
+    .lm-cat__label {
+        margin-top: 8px;
+        font-size: 0.9rem;
+        color: var(--lm-muted);
+    }
+
+    /* ===================== RECHERCHE ===================== */
+    .lm-searchbox {
+        position: relative;
+        max-width: 560px;
+        margin-bottom: 18px;
+    }
+
+    .lm-searchbox__icon {
+        position: absolute;
+        left: 16px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: var(--lm-orange);
+        font-size: 1.05rem;
+    }
+
+    .lm-searchbox__input {
+        width: 100%;
+        box-sizing: border-box;
+        padding: 14px 44px 14px 44px;
+        font-family: inherit;
+        font-size: 1rem;
+        color: var(--lm-blue);
+        background: var(--lm-white);
+        border: 1px solid var(--lm-border);
+        border-radius: 30px;
+        box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.05);
+        transition: border-color 0.18s, box-shadow 0.18s;
+    }
+
+    .lm-searchbox__input:focus {
+        outline: none;
+        border-color: var(--lm-orange);
+        box-shadow: 0 0 0 3px rgba(218, 142, 43, 0.18);
+    }
+
+    .lm-searchbox__clear {
+        position: absolute;
+        right: 12px;
+        top: 50%;
+        transform: translateY(-50%);
+        background: #eef2f6;
+        border: none;
+        border-radius: 50%;
+        width: 26px;
+        height: 26px;
+        cursor: pointer;
+        color: var(--lm-muted);
+    }
+
+    .lm-searchbox__clear:hover { background: #e0e6ec; color: var(--lm-blue); }
+
+    .lm-results-count {
+        font-size: 1rem;
+        color: var(--lm-muted);
+        margin-bottom: 20px;
+    }
+
+    .lm-results-count strong { color: var(--lm-blue); font-size: 1.15rem; }
+
+    .lm-empty {
+        text-align: center;
+        padding: 40px;
+        color: var(--lm-muted);
+        background: var(--lm-white);
+        border: 1px dashed var(--lm-border);
+        border-radius: 12px;
+    }
+
+    .lm-empty .fa { display: block; font-size: 2rem; margin-bottom: 10px; color: var(--lm-orange); }
+
+    /* ===================== CARTES PERSONNE ===================== */
+    .lm-results {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 20px;
+    }
+
+    .lm-person {
+        background: var(--lm-white);
+        border: 1px solid var(--lm-border);
+        border-left: 5px solid var(--lm-blue);
+        border-radius: 10px;
+        padding: 20px 22px;
+        box-shadow: 0 5px 16px rgba(0, 35, 59, 0.06);
+        transition: transform 0.2s, box-shadow 0.2s, border-left-color 0.2s;
+    }
+
+    .lm-person:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 12px 26px rgba(0, 35, 59, 0.13);
+        border-left-color: var(--lm-orange);
+    }
+
+    .lm-person__name {
+        font-size: 1.2rem;
+        font-weight: 700;
+        color: var(--lm-blue);
+        text-transform: uppercase;
+        margin-bottom: 12px;
+        letter-spacing: 0.02em;
+    }
+
+    .lm-person__name span {
+        font-weight: 400;
+        text-transform: capitalize;
+        color: var(--lm-blue-light);
+    }
+
+    .lm-person__line {
+        font-size: 0.92rem;
+        color: var(--lm-muted);
+        line-height: 1.5;
+        margin-bottom: 6px;
+    }
+
+    .lm-person__line .fa { color: var(--lm-blue-light); margin-right: 7px; width: 14px; text-align: center; }
+
+    .lm-person__death { color: var(--lm-blue); font-weight: 500; }
+    .lm-person__death .fa { color: var(--lm-orange-vif); }
+
+    .lm-person__obs {
+        font-size: 0.85rem;
+        font-style: italic;
+        color: var(--lm-muted);
+        margin: 8px 0;
+        padding: 8px 10px;
+        background: #f7f9fb;
+        border-radius: 6px;
+    }
+
+    .lm-person__obs .fa { color: var(--lm-orange); }
+
+    .lm-person__badges {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-top: 14px;
+    }
+
+    .lm-badge {
+        font-size: 0.75rem;
+        font-weight: 600;
+        padding: 4px 12px;
+        border-radius: 20px;
+    }
+
+    .lm-badge--conflit { background: rgba(0, 62, 106, 0.1); color: var(--lm-blue); }
+    .lm-badge--cat { background: rgba(218, 142, 43, 0.16); color: var(--lm-orange-vif); }
+
+    /* ===================== PAGINATION ===================== */
+    .lm-pagination {
+        margin-top: 28px;
+        display: flex;
+        justify-content: center;
+    }
+
+    /* ===================== SOURCE ===================== */
+    .lm-source {
+        margin: 50px 24px 0;
+        padding-top: 22px;
+        border-top: 1px solid var(--lm-border);
+        font-size: 0.85rem;
+        color: var(--lm-muted);
+        text-align: center;
+    }
+
+    .lm-source .fa { color: var(--lm-orange); margin-right: 6px; }
+    .lm-source strong { color: var(--lm-blue); }
+
+    /* ===================== RESPONSIVE ===================== */
+    @media (max-width: 980px) {
+        .lm-geo { grid-template-columns: 1fr; }
+        .lm-map { height: 420px; }
+        .lm-hero__title { font-size: 2.1rem; }
+    }
+
+    @media (max-width: 600px) {
+        .lm-hero { padding: 40px 22px 80px; }
+        .lm-hero__title { font-size: 1.7rem; }
+        .lm-section { padding: 34px 16px 0; }
+        .lm-tabs { padding: 0 14px; }
+        .lm-tab { font-size: 0.85rem; padding: 9px 15px; }
+        .lm-kpi__value { font-size: 1.8rem; }
+    }
+  </style>
+</head>
+
+<body>
+<div ng-cloak ng-app="lmApp">
+
+  <div class="lm-page"
+       ng-init="memorial = {conflit:null}; search = {}; values = {};
+                paysLabels = {'FRA':'France','MER':'En mer','BEL':'Belgique','VNM':'Vietnam','DEU':'Allemagne','DZA':'Algérie','MAR':'Maroc','SRB':'Serbie','TUR':'Turquie','GRC':'Grèce','SYR':'Syrie','LAO':'Laos','TUN':'Tunisie','AUT':'Autriche','ITA':'Italie','GBR':'Royaume-Uni','KOR':'Corée du Sud','MDG':'Madagascar','CMR':'Cameroun','RUS':'Russie','POL':'Pologne','CHE':'Suisse','LUX':'Luxembourg','NLD':'Pays-Bas','ESP':'Espagne'}">
+
+    <ods-dataset-context context="ctx"
+                         ctx-dataset="lorientais-morts-pour-la-france-ville-de-lorient-analyse-par-commune"
+                         ctx-domain="sdem.huwise.com"
+                         ctx-parameters="{'sort':'nom'}">
+
+      <!-- ============ Synchronisation filtres (cachés) ============ -->
+      <span class="lm-hidden">{{ ctx.parameters['refine.conflit'] = memorial.conflit ? memorial.conflit : undefined; '' }}</span>
+      <span class="lm-hidden">{{ ctx.parameters.q = search.text ? search.text : undefined; '' }}</span>
+
+      <!-- ============ Agrégations KPI (cachées) ============ -->
+      <span class="lm-hidden" ods-adv-analysis="kpiTotal" ods-adv-analysis-context="ctx"
+            ods-adv-analysis-select="count(*) as nb">{{ values.total = kpiTotal[0].nb; '' }}</span>
+      <span class="lm-hidden" ods-adv-analysis="kpiMer" ods-adv-analysis-context="ctx"
+            ods-adv-analysis-select="count(*) as nb"
+            ods-adv-analysis-where="code_pays_deces LIKE 'MER'">{{ values.mer = kpiMer[0].nb; '' }}</span>
+      <span class="lm-hidden" ods-adv-analysis="kpiMil" ods-adv-analysis-context="ctx"
+            ods-adv-analysis-select="count(*) as nb"
+            ods-adv-analysis-where="categorie LIKE 'Militaire%'">{{ values.mil = kpiMil[0].nb; '' }}</span>
+
+      <!-- ====================================================== -->
+      <!-- HERO                                                   -->
+      <!-- ====================================================== -->
+      <header class="lm-hero">
+        <div class="lm-hero__inner">
+          <h1 class="lm-hero__title">Les Lorientais Morts pour la France</h1>
+          <p class="lm-hero__source">
+            <i class="fa fa-database" aria-hidden="true"></i>
+            Source : <a href="https://sdem.huwise.com/explore/dataset/lorientais-morts-pour-la-france-ville-de-lorient-analyse-par-commune/information/" target="_blank" rel="noopener">Jeu de données source</a>.
+            Producteur : Ville de Lorient. Données publiées en Open Data par
+            <a href="https://sdem.huwise.com/pages/home/" target="_blank" rel="noopener">Morbihan Energies</a>.
+          </p>
+
+          <div class="lm-kpis">
+            <div class="lm-kpi">
+              <div class="lm-kpi__value">{{ (values.total | number:0) || '…' }}</div>
+              <div class="lm-kpi__label"><i class="fa fa-users" aria-hidden="true"></i> Morts pour la France</div>
+            </div>
+            <div class="lm-kpi">
+              <div class="lm-kpi__value">{{ (values.mer | number:0) || '0' }}</div>
+              <div class="lm-kpi__label"><i class="fa fa-anchor" aria-hidden="true"></i> Tombés en mer</div>
+            </div>
+            <div class="lm-kpi">
+              <div class="lm-kpi__value">{{ (values.mil | number:0) || '0' }}</div>
+              <div class="lm-kpi__label"><i class="fa fa-shield" aria-hidden="true"></i> Militaires</div>
+            </div>
+            <div class="lm-kpi">
+              <div class="lm-kpi__value">1914&nbsp;–&nbsp;1962</div>
+              <div class="lm-kpi__label"><i class="fa fa-calendar" aria-hidden="true"></i> Période couverte</div>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <!-- ====================================================== -->
+      <!-- NAVIGATION PAR CONFLIT (onglets / pills)               -->
+      <!-- ====================================================== -->
+      <nav class="lm-tabs" aria-label="Filtrer par conflit">
+        <button type="button" class="lm-tab" ng-class="{'is-active': !memorial.conflit}"
+                ng-click="memorial.conflit = null">Tous les conflits</button>
+        <button type="button" class="lm-tab" ng-class="{'is-active': memorial.conflit == 'Première Guerre mondiale'}"
+                ng-click="memorial.conflit = 'Première Guerre mondiale'">1914&nbsp;–&nbsp;1918</button>
+        <button type="button" class="lm-tab" ng-class="{'is-active': memorial.conflit == 'Seconde Guerre mondiale'}"
+                ng-click="memorial.conflit = 'Seconde Guerre mondiale'">1939&nbsp;–&nbsp;1945</button>
+        <button type="button" class="lm-tab" ng-class="{'is-active': memorial.conflit == 'Guerre d\'Indochine'}"
+                ng-click="memorial.conflit = 'Guerre d\'Indochine'">Indochine</button>
+        <button type="button" class="lm-tab" ng-class="{'is-active': memorial.conflit == 'Guerre d\'Algérie, des combats du Maroc et de la Tunisie'}"
+                ng-click="memorial.conflit = 'Guerre d\'Algérie, des combats du Maroc et de la Tunisie'">Algérie &middot; Maroc &middot; Tunisie</button>
+        <button type="button" class="lm-tab" ng-class="{'is-active': memorial.conflit == 'Guerre de Corée'}"
+                ng-click="memorial.conflit = 'Guerre de Corée'">Corée</button>
+        <button type="button" class="lm-tab" ng-class="{'is-active': memorial.conflit == 'Autres théâtres d\'opérations'}"
+                ng-click="memorial.conflit = 'Autres théâtres d\'opérations'">Autres lieux</button>
+      </nav>
+
+      <p class="lm-tabs__context" ng-if="memorial.conflit">
+        <i class="fa fa-filter" aria-hidden="true"></i>
+        Affichage filtré : <strong>{{ memorial.conflit }}</strong>
+        <button type="button" class="lm-tabs__reset" ng-click="memorial.conflit = null">
+          <i class="fa fa-times" aria-hidden="true"></i> Réinitialiser
+        </button>
+      </p>
+
+      <!-- ====================================================== -->
+      <!-- SECTION : OÙ ILS SONT TOMBÉS (carte + pays)            -->
+      <!-- ====================================================== -->
+      <section class="lm-section">
+        <h2 class="lm-h2">Où ils sont tombés</h2>
+        <p class="lm-lead">
+          Répartition géographique des lieux de décès. La carte se met à jour selon le conflit sélectionné.
+        </p>
+
+        <div class="lm-geo">
+          <!-- Carte -->
+          <div class="lm-card lm-geo__map">
+            <ods-map class="lm-map"
+                     no-refit="true"
+                     scroll-wheel-zoom="false"
+                     display-control="false"
+                     search-box="false"
+                     toolbar-fullscreen="true"
+                     toolbar-drawing="false"
+                     toolbar-geolocation="false"
+                     location="5,47.5,3">
+              <ods-map-layer-group>
+                <ods-map-layer context="ctx"
+                               display="clusters"
+                               color="#da8e2b"
+                               picto="circle"
+                               show-marker="true">
+                </ods-map-layer>
+              </ods-map-layer-group>
+            </ods-map>
+            <p class="lm-map__caption">
+              <i class="fa fa-map-o" aria-hidden="true"></i>
+              Fond de carte © OpenStreetMap &middot; contributeurs
+            </p>
+          </div>
+
+          <!-- Top pays / lieux de décès -->
+          <div class="lm-card lm-geo__stats">
+            <h3 class="lm-h3">Principaux lieux de décès</h3>
+            <span class="lm-hidden" ods-adv-analysis="paysData" ods-adv-analysis-context="ctx"
+                  ods-adv-analysis-select="count(*) as nb"
+                  ods-adv-analysis-group-by="code_pays_deces"
+                  ods-adv-analysis-order-by="nb desc"
+                  ods-adv-analysis-limit="8">{{ values.pays = paysData; values.paysMax = (paysData[0].nb || 1); '' }}</span>
+
+            <ul class="lm-bars">
+              <li class="lm-bar" ng-repeat="p in values.pays track by $index" ng-if="p.code_pays_deces">
+                <div class="lm-bar__head">
+                  <span class="lm-bar__label">{{ paysLabels[p.code_pays_deces] || p.code_pays_deces }}</span>
+                  <span class="lm-bar__value">{{ p.nb | number:0 }}</span>
+                </div>
+                <div class="lm-bar__track">
+                  <div class="lm-bar__fill" style="width: {{ (p.nb / values.paysMax) * 100 }}%"></div>
+                </div>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <!-- ====================================================== -->
+      <!-- SECTION : AU FIL DU TEMPS (timeline)                   -->
+      <!-- ====================================================== -->
+      <section class="lm-section">
+        <h2 class="lm-h2">Au fil du temps</h2>
+        <p class="lm-lead">
+          Nombre de décès enregistrés par année.
+        </p>
+        <div class="lm-card lm-chart">
+          <div ng-switch="memorial.conflit || 'all'">
+            <div ng-switch-default>
+              <ods-chart timescale="year" single-y-axis="true">
+                <ods-chart-query context="ctx" field-x="date_deces" maxpoints="0" timescale="year">
+                  <ods-chart-serie expression-y="id" chart-type="column" function-y="COUNT"
+                                   label-y="Décès" color="#003e6a" scientific-display="false">
+                  </ods-chart-serie>
+                </ods-chart-query>
+              </ods-chart>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ====================================================== -->
+      <!-- SECTION : QUI ILS ÉTAIENT (catégories)                 -->
+      <!-- ====================================================== -->
+      <section class="lm-section">
+        <h2 class="lm-h2">Qui ils étaient</h2>
+        <p class="lm-lead">
+          Répartition par catégorie.
+        </p>
+        <span class="lm-hidden" ods-adv-analysis="catData" ods-adv-analysis-context="ctx"
+              ods-adv-analysis-select="count(*) as nb"
+              ods-adv-analysis-group-by="categorie"
+              ods-adv-analysis-order-by="nb desc"
+              ods-adv-analysis-limit="8">{{ values.cats = catData; '' }}</span>
+
+        <div class="lm-cats">
+          <div class="lm-cat" ng-repeat="c in (values.cats | mergeCategories) track by $index">
+            <div class="lm-cat__value">{{ c.nb | number:0 }}</div>
+            <div class="lm-cat__label">{{ c.label }}</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ====================================================== -->
+      <!-- SECTION : RECHERCHER UN NOM                            -->
+      <!-- ====================================================== -->
+      <section class="lm-section lm-search-section">
+        <h2 class="lm-h2">Rechercher un nom</h2>
+        <p class="lm-lead">
+          Recherche par nom, prénom ou commune. Le filtre par conflit ci-dessus s'applique également.
+        </p>
+
+        <div class="lm-searchbox">
+          <i class="fa fa-search lm-searchbox__icon" aria-hidden="true"></i>
+          <input type="text" class="lm-searchbox__input"
+                 ng-model="search.text" ng-model-options="{debounce: 300}"
+                 placeholder="Nom, prénom, commune…">
+          <button type="button" class="lm-searchbox__clear" ng-if="search.text"
+                  ng-click="search.text = ''"><i class="fa fa-times" aria-hidden="true"></i></button>
+        </div>
+
+        <div class="lm-results-count">
+          <strong>{{ ctx.nhits | number:0 }}</strong> nom<span ng-if="ctx.nhits != 1">s</span>
+          <span ng-if="memorial.conflit"> &middot; {{ memorial.conflit }}</span>
+        </div>
+
+        <div ng-if="ctx.nhits === 0" class="lm-empty">
+          <i class="fa fa-search" aria-hidden="true"></i>
+          Aucun nom ne correspond à cette recherche.
+        </div>
+
+        <div class="lm-results" ods-results="people" ods-results-context="ctx" ods-results-max="12">
+          <article class="lm-person" ng-repeat="p in people track by $index">
+            <div class="lm-person__name">{{ p.fields.nom }} <span>{{ p.fields.prenom }}</span></div>
+            <div class="lm-person__line" ng-if="p.fields.date_naissance">
+              <i class="fa fa-certificate" aria-hidden="true"></i>
+              Né(e) le {{ p.fields.date_naissance | date:'dd/MM/yyyy' }}<span ng-if="p.fields.lieu_naissance"> à {{ p.fields.lieu_naissance }}</span>
+            </div>
+            <div class="lm-person__line lm-person__death">
+              <i class="fa fa-times-circle" aria-hidden="true"></i>
+              Mort(e) pour la France le {{ p.fields.date_deces | date:'dd/MM/yyyy' }}<span ng-if="p.fields.lieu_deces"> &middot; {{ p.fields.lieu_deces }}</span>
+            </div>
+            <div class="lm-person__obs" ng-if="p.fields.observation">
+              <i class="fa fa-info-circle" aria-hidden="true"></i> {{ p.fields.observation }}
+            </div>
+            <div class="lm-person__badges">
+              <span class="lm-badge lm-badge--conflit">{{ p.fields.conflit }}</span>
+              <span class="lm-badge lm-badge--cat" ng-if="p.fields.categorie">{{ p.fields.categorie }}</span>
+            </div>
+          </article>
+        </div>
+
+        <div class="lm-pagination">
+          <ods-pagination-block context="ctx" per-page="12" nofollow="true"></ods-pagination-block>
+        </div>
+      </section>
+
+      <!-- ====================================================== -->
+      <!-- SOURCE                                                 -->
+      <!-- ====================================================== -->
+      <footer class="lm-source">
+        <p>
+          <i class="fa fa-database" aria-hidden="true"></i>
+          Source : <strong>Ville de Lorient</strong> &middot;
+          Données issues du jeu « Lorientais morts pour la France » &middot;
+          Dernière mise à jour des données : 2019.
+        </p>
+      </footer>
+
+    </ods-dataset-context>
+  </div>
+
+</div>
+
+<!-- ===================================================================
+     DÉPENDANCES ods-widgets (ordre impératif : jQuery → Angular →
+     ngSanitize → ods-widgets). À charger en fin de body.
+     =================================================================== -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.0/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/angular.js/1.8.2/angular.min.js"></script>
+<!-- Locale FR : sépare les milliers par une espace insécable (1 832, pas 1,832) -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/angular-i18n/1.8.2/angular-locale_fr-fr.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/angular-sanitize/1.8.2/angular-sanitize.min.js"></script>
+<script src="https://static.huwise.com/ods-widgets/latest-v2/ods-widgets.min.js"></script>
+
+<!-- Module applicatif : configure un fond de carte OpenStreetMap libre
+     (provider "custom" → tuiles OSM standard, sans clé d'API). -->
+<script>
+  angular.module('lmApp', ['ods-widgets'])
+    .config(['ODSWidgetsConfigProvider', function (ODSWidgetsConfigProvider) {
+      ODSWidgetsConfigProvider.setConfig({
+        basemaps: [{
+          provider: 'custom',
+          label: 'OpenStreetMap',
+          url: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+          subdomains: 'abc',
+          attribution: '© OpenStreetMap contributors',
+          minZoom: 2,
+          maxZoom: 19
+        }]
+      });
+    }])
+    // Fusionne/relibelle les catégories (corrige une casse incohérente du dataset :
+    // "résistant" + "Résistant" → "Résistants" ; "Déporté" → "Déportés"). Ignore les valeurs nulles.
+    .filter('mergeCategories', function () {
+      var LABELS = {
+        'résistant': 'Résistants',
+        'Résistant': 'Résistants',
+        'Déporté': 'Déportés'
+      };
+      return function (cats) {
+        if (!cats) { return cats; }
+        var out = [];
+        var index = {};
+        cats.forEach(function (c) {
+          if (!c.categorie) { return; }
+          var label = LABELS[c.categorie] || c.categorie;
+          if (index[label] === undefined) {
+            index[label] = out.length;
+            out.push({ label: label, nb: c.nb });
+          } else {
+            out[index[label]].nb += c.nb;
+          }
+        });
+        return out;
+      };
+    });
+</script>
+</body>
+</html>

@@ -1,0 +1,15 @@
+# OS
+.DS_Store
+
+# Claude Code
+.claude/
+
+# Pages Huwise (éditeur interne) — non publiées sur GitHub
+lorient-memorial.html
+lorient-memorial.css
+
+# Images — non nécessaires sur GitHub
+images/
+
+# Feuille Tailwind non utilisée par la page embed (décommenter si à garder)
+stylesheet.css

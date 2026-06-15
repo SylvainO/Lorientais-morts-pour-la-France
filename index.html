@@ -739,9 +739,6 @@
       <!-- ====================================================== -->
       <section class="lm-section">
         <h2 class="lm-h2">Qui ils étaient</h2>
-        <p class="lm-lead">
-          Répartition par catégorie.
-        </p>
         <span class="lm-hidden" ods-adv-analysis="catData" ods-adv-analysis-context="ctx"
               ods-adv-analysis-select="count(*) as nb"
               ods-adv-analysis-group-by="categorie"
@@ -855,16 +852,41 @@
         }]
       });
     }])
+    // Highcharts (utilisé par ods-chart) : par défaut ods-widgets le charge depuis
+    // code.highcharts.com, qui renvoie des 429 (Too Many Requests) → le graphique ne
+    // s'affiche pas. On redirige vers jsDelivr (miroir npm), plus tolérant, en gardant
+    // la même version 11.1.0 attendue par ods-widgets.
+    .config(['ModuleLazyLoaderProvider', function (ModuleLazyLoaderProvider) {
+      ModuleLazyLoaderProvider.getConfig().highcharts = {
+        css: [],
+        js: [
+          ['https://cdn.jsdelivr.net/npm/highcharts@11.1.0/highcharts.js'],
+          ['https://cdn.jsdelivr.net/npm/highcharts@11.1.0/modules/no-data-to-display.js'],
+          ['https://cdn.jsdelivr.net/npm/highcharts@11.1.0/highcharts-more.js'],
+          ['https://cdn.jsdelivr.net/npm/highcharts@11.1.0/modules/treemap.js'],
+          ['https://cdn.jsdelivr.net/npm/highcharts@11.1.0/modules/funnel.js']
+        ]
+      };
+    }])
     // Fusionne/relibelle les catégories (corrige une casse incohérente du dataset :
     // "résistant" + "Résistant" → "Résistants" ; "Déporté" → "Déportés"). Ignore les valeurs nulles.
     .filter('mergeCategories', function () {
       var LABELS = {
         'résistant': 'Résistants',
         'Résistant': 'Résistants',
-        'Déporté': 'Déportés'
+        'Déporté': 'Déportés',
+        'Militaire/ Soldat': 'Militaires / Soldats',
+        'Civil(e)': 'Civil(e)s'
       };
+      // Mémoïsation indispensable : ce filtre est appelé dans un ng-repeat à chaque
+      // digest. Sans cache, il renverrait un NOUVEAU tableau à chaque passe → AngularJS
+      // détecterait un changement perpétuel de la collection → boucle de digest infinie
+      // ($rootScope:infdig), qui gèle le reste de l'UI (dont la pagination). On renvoie
+      // donc la même référence tant que l'entrée (catData) n'a pas changé.
+      var lastInput, lastOutput;
       return function (cats) {
         if (!cats) { return cats; }
+        if (cats === lastInput) { return lastOutput; }
         var out = [];
         var index = {};
         cats.forEach(function (c) {
@@ -877,6 +899,8 @@
             out[index[label]].nb += c.nb;
           }
         });
+        lastInput = cats;
+        lastOutput = out;
         return out;
       };
     })
